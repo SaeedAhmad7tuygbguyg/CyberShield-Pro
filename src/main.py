@@ -1,22 +1,28 @@
 import streamlit as st
-try:
-    from engine import check_password_strength, generate_strong_password
-except ModuleNotFoundError:
-    from src.engine import check_password_strength, generate_strong_password
+import sys
+import os
 
-# Page configuration
+# System path set kar rahe hain taake 'src' folder ki files mil saken
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+try:
+    from src.engine import check_password_strength, generate_strong_password
+except ImportError:
+    from engine import check_password_strength, generate_strong_password
+
+# --- Page Config ---
 st.set_page_config(page_title="CyberShield Pro", page_icon="🛡️", layout="centered")
 
-# Custom CSS for UI Enhancement
+# --- Custom Styling ---
 st.markdown("""
     <style>
-    /* Buttons ko center alignment dene ke liye */
-    div.stButton > button:first-child {
+    div.stButton > button {
         display: block;
         margin: 0 auto;
-        width: auto;
-        padding-left: 30px;
-        padding-right: 30px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 10px;
+        padding: 10px 24px;
     }
     .main {
         background-color: #0e1117;
@@ -25,36 +31,37 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🛡️ CyberShield Pro")
-st.subheader("Advanced Password Security Analyzer")
+st.write("Professional Password Security Analyzer & Generator")
 
-# User Input
+# --- Input Section ---
 password = st.text_input("Enter password to analyze:", type="password")
 
 if password:
     results = check_password_strength(password)
-    # Aapka purana analysis wala code yahan rehne dein...
-    st.write(f"Strength: {results['score']}/4")
+    st.subheader(f"Strength Score: {results['score']}/4")
+    
+    # Feedback loop
+    if results['feedback']:
+        for hint in results['feedback']:
+            st.warning(hint)
+    else:
+        st.success("Great! This is a very strong password.")
 
 st.divider()
 
-# --- BUTTONS SECTION (CENTERED) ---
+# --- Buttons Section (Centered) ---
 st.write("### Need a Stronger Password?")
 
-# Pehla button center karne ke liye columns ka use
-col1, col2, col3 = st.columns([1, 3, 1])
-with col2:
-    if st.button("🔄 Generate New Strongest Password"):
-        new_pw = generate_strong_password()
-        st.session_state['generated_pw'] = new_pw
+col1, col2, col3 = st.columns([1, 2, 1])
 
-# Agar password generate ho chuka hai toh usey display aur copy button dikhayein
-if 'generated_pw' in st.session_state:
-    st.success(f"Generated Password: `{st.session_state['generated_pw']}`")
+with col2:
+    if st.button("🔄 Generate Strongest Password"):
+        st.session_state['new_pw'] = generate_strong_password()
+
+if 'new_pw' in st.session_state:
+    st.code(st.session_state['new_pw'], language="")
     
-    # Copy button ko center karne ke liye columns
-    c1, c2, c3 = st.columns([1, 1, 1])
+    # Center the copy tip
+    c1, c2, c3 = st.columns([1, 2, 1])
     with c2:
-        # Note: Streamlit 1.30+ mein code block ke sath copy feature khud aata hai
-        # Par agar aap button chahte hain:
-        st.button("📋 Copy to Clipboard")
-        st.info("Tip: You can also copy from the box above!")
+        st.info("⬆️ Copy the password from the box above")
