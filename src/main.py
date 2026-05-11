@@ -1,5 +1,5 @@
 import streamlit as st
-from engine import check_password_strength, generate_strong_password
+from src.engine import check_password_strength, generate_strong_password
 
 # Page configuration
 st.set_page_config(page_title="CyberShield Pro", page_icon="🛡️", layout="centered")
